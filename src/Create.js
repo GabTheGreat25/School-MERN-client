@@ -1,17 +1,21 @@
 import React, { useState } from "react";
 import Nav from "./Nav";
 import axios from "axios";
+import { getUser, getToken } from "./Helpers";
+import { useParams, useNavigate } from "react-router-dom";
 
 const Create = () => {
   // state
   const [state, setState] = useState({
     title: "",
     content: "",
-    user: "",
+    // user: ''
+    user: getUser(),
   });
 
   // destructure values from state
   const { title, content, user } = state;
+  let navigate = useNavigate();
 
   // onchange event handler
   const handleChange = (name) => (event) => {
@@ -28,10 +32,22 @@ const Create = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    // console.table({ title, content, user });
     axios
       //promises
-      .post(`${process.env.REACT_APP_API}/post`, { ...state })
-      //   .post(`${process.env.REACT_APP_API}/post`, { title, content, user })
+      // .post(`${process.env.REACT_APP_API}/post`, { ...state })
+      .post(
+        `${process.env.REACT_APP_API}/post`,
+        { title, content, user },
+        {
+          headers: {
+            authorization: `Bearer ${getToken()}`,
+          },
+        }
+      )
+
+      // .post(`${process.env.REACT_APP_API}/post`, { title, content, user })
+
       //process
       .then((response) => {
         console.log(response);
@@ -39,8 +55,10 @@ const Create = () => {
         // setState({ ...state, title: "", content: "", user: "" });
         // setState({ title: "", content: "", user: "" }); //! iisa lang
         setState({ ...state });
+
         // show sucess alert
         alert(`Post titled ${response.data.title} is created`);
+        return navigate("/");
       })
       //error response
       .catch((error) => {
